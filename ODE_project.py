@@ -79,6 +79,8 @@ for it in range(1000):
     if it % 200 == 0:
         print(it, loss.item(), "NFE:", func.nfe); func.nfe = 0
 
+torch.save(func.state_dict(), "ode_func.pth")
+
 # func.eval()
 
 true_f = f_linear
