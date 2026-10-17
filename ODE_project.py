@@ -3,7 +3,7 @@ import torchdiffeq
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn as nn
-from torchdiffeq import odeint
+from torchdiffeq import odeint_adjoint as odeint
 import torch.nn as nn
 
 def linear_ODE(A, x, t):
@@ -42,8 +42,11 @@ class ODEFunc(nn.Module):
     def __init__(self, dim=2, hidden=64):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(dim, hidden), nn.Tanh(),
-            nn.Linear(hidden, hidden), nn.Tanh(),
+            nn.Linear(dim, hidden), 
+            nn.Tanh(),
+            nn.Dropout(0.2, inplace=True),
+            nn.Linear(hidden, hidden), 
+            nn.Tanh(),
             nn.Linear(hidden, dim),
         )
         self.nfe = 0
@@ -68,7 +71,7 @@ def get_batch(X, bs=128):
 
 # X_train = data
 
-for it in range(1000):
+for it in range(600):
     opt.zero_grad()
     x0, target = get_batch(X_train)
     pred = odeint(func, x0, t_win, method='dopri5', rtol=1e-6, atol=1e-8)
