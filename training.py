@@ -6,10 +6,12 @@ from datetime import datetime
 
 import definitions
 
-func = definitions.ODEFunc()
+
 t = definitions.t
 X_train = definitions.X_train
 X_test = definitions.X_test
+dim = definitions.dim
+func = definitions.ODEFunc(dim=dim)
 
 opt = torch.optim.Adam(func.parameters(), lr=1e-3)
 dt = (t[1] - t[0]).item()
@@ -17,11 +19,11 @@ win = 20                                  # steps per window
 t_win = torch.arange(win) * dt
 
 def get_batch(X, bs=128):
-    n_steps, n_traj, _ = X.shape
+    n_steps, n_traj = X.shape[:2]
     i = torch.randint(0, n_steps - win, (bs,))
     j = torch.randint(0, n_traj, (bs,))
-    x0 = X[i, j]                                                    # (bs, 2)
-    target = torch.stack([X[i + k, j] for k in range(win)])         # (win, bs, 2)
+    x0 = X[i, j]                                                    # (bs, *state_shape)
+    target = torch.stack([X[i + k, j] for k in range(win)])         # (win, bs, *state_shape)
     return x0, target
 
 
