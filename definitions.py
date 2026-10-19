@@ -25,8 +25,8 @@ def lorentz_f(t, x):
                         x[..., 0] * (28 - x[..., 2]) - x[..., 1],
                         x[..., 0] * x[..., 1] - 8/3 * x[..., 2]], dim=-1)
 
-true_f = lorentz_f
-dim = 3
+true_f = Van_der_Pol_f
+dim = 2
 
 def make_trajs(n, dim=2, limit=4, T=10.0, n_steps=201, noise=False,seed=0):
     g = torch.Generator().manual_seed(seed)
@@ -38,18 +38,20 @@ def make_trajs(n, dim=2, limit=4, T=10.0, n_steps=201, noise=False,seed=0):
         X += 0.01 * torch.randn_like(X, generator=g)
     return t, X
 
-t, X_train = make_trajs(64, dim=dim, seed=0)
+t, X_train = make_trajs(2048, dim=dim, seed=0, limit=8)
 _, X_test  = make_trajs(32, dim=dim, seed=1)   
 
 class ODEFunc(nn.Module):
-    def __init__(self, dim=2, hidden=16):
+    def __init__(self, dim=2, hidden=32):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(dim, hidden), nn.Tanh(),
 
-            nn.Linear(hidden, hidden*4), nn.Tanh(),
+            nn.Linear(hidden, hidden*16), nn.Tanh(),
 
-            nn.Linear(hidden*4, dim),
+            nn.Linear(hidden*16, hidden), nn.Tanh(),
+
+            nn.Linear(hidden, dim),
         )
         self.nfe = 0
     def forward(self, t, x):             # t unused, since the system is autonomous

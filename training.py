@@ -27,7 +27,7 @@ def get_batch(X, bs=128):
     return x0, target
 
 
-for it in range(1000):
+for it in range(2000):
     opt.zero_grad()
     x0, target = get_batch(X_train)
     pred = odeint(func, x0, t_win, method='dopri5', rtol=1e-4, atol=1e-6)

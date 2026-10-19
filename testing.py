@@ -16,7 +16,8 @@ dim = definitions.dim
 
 # func = torch.load('1017_2127_ode_func.pth', weights_only=False)
 # func = torch.load('1018_1300_ode_func.pth', weights_only=False)
-func = torch.load('1018_1801_ode_func.pth', weights_only=False)
+# func = torch.load('1018_1801_ode_func.pth', weights_only=False)
+func = torch.load('1019_1758_ode_func.pth', weights_only=False)
 func.eval()
 
 true_f = definitions.true_f
