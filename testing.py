@@ -13,11 +13,14 @@ f_linear = definitions.f_linear
 X_test = definitions.X_test
 t = definitions.t
 dim = definitions.dim
+noise = definitions.noise
 
 # func = torch.load('1017_2127_ode_func.pth', weights_only=False)
 # func = torch.load('1018_1300_ode_func.pth', weights_only=False)
 # func = torch.load('1018_1801_ode_func.pth', weights_only=False)
-func = torch.load('1019_1758_ode_func.pth', weights_only=False)
+# func = torch.load('1019_1758_ode_func.pth', weights_only=False)
+func = torch.load('1020_1956_ode_func.pth', weights_only=False)
+
 func.eval()
 
 true_f = definitions.true_f
@@ -151,3 +154,65 @@ elif dim == 3:
     ax.legend()
     ax.grid(True)
     plt.show()
+
+if noise:
+    # Compare a few noisy training trajectories with Neural ODE rollouts
+    # initialized from the same observed starting points.
+    train_data = definitions.X_train
+    clean_data = definitions.X_clean
+    n_train = min(5, train_data.shape[1])
+    scatter_stride = 5  # Plot every nth noisy observation to reduce clutter.
+    train_pred = rollout(func, train_data[0, :n_train], t)
+
+    if dim == 2:
+        fig, ax = plt.subplots()
+        for i in range(n_train):
+            points = ax.scatter(
+                train_data[::scatter_stride, i, 0].numpy(),
+                train_data[::scatter_stride, i, 1].numpy(),
+                alpha=0.7, label=f"Noisy training data {i + 1}"
+            )
+            ax.plot(
+                clean_data[:, i, 0].numpy(), clean_data[:, i, 1].numpy(),
+                color=points.get_facecolor()[0], linestyle="-",
+                label=f"Clean training trajectory {i + 1}"
+            )
+            ax.plot(
+                train_pred[:, i, 0].numpy(), train_pred[:, i, 1].numpy(),
+                color=points.get_facecolor()[0], linestyle="--",
+                label=f"Neural ODE prediction {i + 1}"
+            )
+        ax.set_xlabel("x₁")
+        ax.set_ylabel("x₂")
+        ax.set_title("Noisy training trajectories vs Neural ODE predictions")
+        ax.legend()
+        ax.grid(True)
+        plt.show()
+
+    elif dim == 3:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        for i in range(n_train):
+            points = ax.scatter(
+                train_data[::scatter_stride, i, 0].numpy(),
+                train_data[::scatter_stride, i, 1].numpy(),
+                train_data[::scatter_stride, i, 2].numpy(), alpha=0.7,
+                label=f"Noisy training data {i + 1}"
+            )
+            ax.plot(
+                clean_data[:, i, 0].numpy(), clean_data[:, i, 1].numpy(),
+                clean_data[:, i, 2].numpy(), color=points.get_facecolor()[0],
+                linestyle="-", label=f"Clean training trajectory {i + 1}"
+            )
+            ax.plot(
+                train_pred[:, i, 0].numpy(), train_pred[:, i, 1].numpy(),
+                train_pred[:, i, 2].numpy(), color=points.get_facecolor()[0],
+                linestyle="--", label=f"Neural ODE prediction {i + 1}"
+            )
+        ax.set_xlabel("x₁")
+        ax.set_ylabel("x₂")
+        ax.set_zlabel("x₃")
+        ax.set_title("Noisy training trajectories vs Neural ODE predictions")
+        ax.legend()
+        ax.grid(True)
+        plt.show()
